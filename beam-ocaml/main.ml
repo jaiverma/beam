@@ -5,6 +5,11 @@ let main () =
   >>= fun contents ->
   print_endline contents;
   Lwt.return_unit
+  >>= fun () ->
+  Ops.read_dir "/mnt/d"
+  >>= fun dirs ->
+  List.iter print_endline dirs;
+  Lwt.return_unit
 ;;
 
 let () = Lwt_main.run @@ main ()
