@@ -1,0 +1,3 @@
+(test
+ (name ops_test)
+ (libraries ops ounit2))
