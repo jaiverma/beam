@@ -26,10 +26,15 @@ let write_file filename contents =
 
 (* function to read contents of a directory *)
 let read_dir path =
-  Lwt_result.bind
-    (Lwt_result.ok (Lwt_unix.opendir path))
-    (fun hndl ->
+  (* `Lwt_unix.opendir` may fail if the directory doesn't exist. Use `Lwt.catch` to catch
+   * the exception and return a `Result` instead *)
+  Lwt.catch
+    (fun () ->
+      let hndl = Lwt_unix.opendir path in
       let rec read_dir_entry hndl acc =
+        (* Lwt_unix.readdir raises an `End_of_file` exception if the directory handler
+         * reaches EOF. Handle this by catching the exception and returning `None`.
+         * In a successful call, we return `Some (dirname)` *)
         let dirname =
           Lwt.catch
             (fun () -> Lwt_unix.readdir hndl >>= fun dirname -> Lwt.return_some dirname)
@@ -42,5 +47,9 @@ let read_dir path =
         | Some d -> read_dir_entry hndl (d :: acc)
         | None -> Lwt.return acc
       in
+      hndl
+      >>= fun hndl ->
       read_dir_entry hndl [] >>= fun dirlist -> Lwt.return_ok @@ String.concat dirlist)
+    (function
+      | _ -> Lwt.return_error @@ Printf.sprintf "failed to read dir: %s" path)
 ;;
