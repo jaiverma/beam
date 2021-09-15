@@ -1,3 +1,4 @@
 (library
  (name beam)
- (libraries core lwt lwt.unix logs logs.lwt))
+ (libraries core lwt lwt.unix logs logs.lwt yojson)
+ (preprocess (pps ppx_deriving_yojson ppx_deriving.show)))

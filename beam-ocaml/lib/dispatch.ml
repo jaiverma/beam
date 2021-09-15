@@ -4,6 +4,7 @@ type cmd =
   | READ_DIR of string
   | READ_FILE of string
   | WRITE_FILE of string * string
+[@@deriving yojson, show]
 
 let call = function
   | READ_DIR dirname -> Ops.read_dir dirname
